@@ -3,6 +3,11 @@
 
 This project was inspired by the [flask-pydantic](https://github.com/bauerji/flask-pydantic) package created by [bauerji](https://github.com/bauerji) and the [Litestar](https://github.com/litestar-org/litestar) framework, however while the `validate` decorator appears similar to the one found in `flask-pydantic` there are many differences.
 
+## Installation
+```shell
+pip install flask-msgspec
+```
+
 ## Usage
 Consider this simple example:
 ```py
