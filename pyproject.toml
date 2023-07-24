@@ -1,0 +1,116 @@
+[tool.poetry]
+name = "flask-msgspec"
+version = "0.0.1"
+description = "msgspec integration for Flask"
+authors = ["Huba Tuba <hubasolttuba@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/floxay/flask-msgspec"
+packages = [{include = "flask_msgspec"}]
+keywords = [
+    "api",
+    "http",
+    "flask",
+    "msgspec",
+    "validate",
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+]
+
+[tool.poetry.urls]
+"Issue Tracker" = "https://github.com/floxay/flask-msgspec/issues"
+"Changelog" = "https://github.com/floxay/flask-msgspec/releases"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4"
+msgspec = ">=0.17.0,<1"
+Flask = ">=2.2.0,<3"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+ruff = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+select = [
+    "A",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "DJ",
+    "DTZ",
+    "E",
+    "ERA",
+    "EXE",
+    "F",
+    "G",
+    "I",
+    "ICN",
+    "ISC",
+    "N",
+    "PIE",
+    "PLC",
+    "PLE",
+    "PLW",
+    "PTH",
+    "Q",
+    "RET",
+    "RUF",
+    "S",
+    "SIM",
+    "T10",
+    "T20",
+    "TCH",
+    "TID",
+    "UP",
+    "W",
+    "YTT",
+]
+ignore = [
+    "A003",
+    "B010",
+    "E501",
+    "S104",
+]
+src = [
+    "flask_msgspec",
+    "tests",
+    "examples"
+]
+
+[tool.ruff.mccabe]
+max-complexity = 10
+
+[tool.ruff.isort]
+known-first-party = [
+    "flask_msgspec",
+    "tests",
+    "examples"
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py38", "py39", "py310", "py311"]
+include = '\.pyi?$'
