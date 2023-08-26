@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flask-msgspec"
-version = "0.0.1"
+version = "0.0.2"
 description = "msgspec integration for Flask"
 authors = ["Huba Tuba <hubasolttuba@gmail.com>"]
 license = "MIT"
