@@ -1,12 +1,13 @@
 import inspect
 from functools import wraps
 from inspect import Parameter, Signature
+from pathlib import PurePath
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
 from flask import current_app, make_response, request
 from msgspec import EncodeError, ValidationError, convert
+from msgspec.json import Encoder
 from msgspec.json import decode as msgspec_json_decode
-from msgspec.json import encode as msgspec_json_encode
 from werkzeug.wrappers import Response
 
 Empty = Signature.empty
@@ -20,7 +21,18 @@ ACCEPTED_PARAMS_KINDS = {
 def _dec_hook(type_: Type[Any], value: Any) -> Any:
     if isinstance(value, type_):
         return value
-    raise TypeError(f"Type `{type(value)}` is not supported.")
+    if issubclass(type_, PurePath):
+        return type_(value)
+    raise NotImplementedError(f"Objects of type {type_} are not supported")
+
+
+def _enc_hook(obj: Any) -> Any:
+    if isinstance(obj, PurePath):
+        return str(obj)
+    raise NotImplementedError(f"Objects of type {type(obj)!r} are not supported")
+
+
+encoder = Encoder(enc_hook=_enc_hook)
 
 
 def _build_param_type_map(
@@ -34,7 +46,7 @@ def _build_param_type_map(
         if param.kind not in ACCEPTED_PARAMS_KINDS:
             continue
         if param.annotation is Empty:
-            raise TypeError(f"Type annonation is missing for `{name}` parameter.")
+            raise TypeError(f"Type annonation is missing for `{name}` parameter")
 
         if name not in kwargs:
             kwargs[name] = param.default
@@ -44,10 +56,10 @@ def _build_param_type_map(
             if type_ is None:
                 if namespace is None:
                     raise KeyError(
-                        f"Unable to resolve type annotation `{param.annotation}`. "
-                        f"Consider supplying a signature namespace."
+                        f"Unable to resolve type annotation `{param.annotation}`, "
+                        f"consider supplying a signature namespace"
                     )
-                raise KeyError(f"Unable to resolve type annotation `{param.annotation}`.")
+                raise KeyError(f"Unable to resolve type annotation `{param.annotation}`")
             param_type_map[name] = type_
         else:
             param_type_map[name] = param.annotation
@@ -85,7 +97,7 @@ def _validate_path_params(
         for name, value in view_args.items():
             kwargs[name] = convert(value, type=param_type_map[name], strict=False, dec_hook=_dec_hook)
     except ValidationError as ex:
-        return {"error": ValidationError.__name__, "detail": {"key": name, "msg": "".join(ex.args)}}
+        return {"error": ValidationError.__name__, "detail": {"key": name, "msg": "".join(ex.args)}}  # type: ignore
 
 
 def _validate_body(
@@ -93,7 +105,7 @@ def _validate_body(
 ) -> Optional[Dict[str, Union[str, Dict[str, Any]]]]:
     body_model = param_type_map.get("body", Empty)
     if body_model is Empty:
-        raise ValueError("Expected a body model type.")
+        raise ValueError("Expected a body model type")
 
     try:
         if isinstance(body_data, bytes):
@@ -121,7 +133,7 @@ def _unpack_result(result: Any) -> Tuple[Any, Optional[int], Any]:
         elif len(result) == 3:
             response_value, status_code, headers = result
     else:
-        raise ValueError(f"Unhandled return type: {type(result)!r}.")
+        raise ValueError(f"Unhandled return type: {type(result)!r}")
 
     return response_value, status_code, headers
 
@@ -137,7 +149,7 @@ def validate(
             sig = inspect.signature(func)
             _return_model = return_model or sig.return_annotation
             if _return_model is Empty:
-                raise TypeError("Missing return type.")
+                raise TypeError("Missing return type")
 
             param_type_map = _build_param_type_map(sig, kwargs, signature_namespace)
 
@@ -162,7 +174,7 @@ def validate(
 
             try:
                 response_value = convert(response_value, type=_return_model, strict=False, dec_hook=_dec_hook)
-                json_data = msgspec_json_encode(response_value)
+                json_data = encoder.encode(response_value)
             except (ValidationError, EncodeError) as ex:
                 return {"error": type(ex).__name__, "detail": {"msg": "".join(ex.args)}}, 422
 
