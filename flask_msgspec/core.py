@@ -154,18 +154,18 @@ def validate(
             param_type_map = _build_param_type_map(sig, kwargs, signature_namespace)
 
             if request.args and (error := _convert_query_params(kwargs, param_type_map)):
-                return error, 422
+                return error, 400
 
             if error := _check_for_missing_query_params(kwargs):
-                return error, 422
+                return error, 400
 
             if request.view_args and (error := _validate_path_params(request.view_args, kwargs, param_type_map)):
-                return error, 422
+                return error, 400
 
             if "body" in kwargs and (
                 error := _validate_body(request.data or request.form.to_dict(), kwargs, param_type_map)
             ):
-                return error, 422
+                return error, 400
 
             result = current_app.ensure_sync(func)(*args, **kwargs)
 
@@ -176,7 +176,7 @@ def validate(
                 response_value = convert(response_value, type=_return_model, strict=False, dec_hook=_dec_hook)
                 json_data = encoder.encode(response_value)
             except (ValidationError, EncodeError) as ex:
-                return {"error": type(ex).__name__, "detail": {"msg": "".join(ex.args)}}, 422
+                return {"error": type(ex).__name__, "detail": {"msg": "".join(ex.args)}}, 400
 
             resp = make_response(json_data, _status_code)
             resp.mimetype = "application/json"
