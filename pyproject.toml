@@ -1,18 +1,24 @@
-[tool.poetry]
+[project]
 name = "flask-msgspec"
-version = "0.0.2"
+authors = [
+    {name = "Huba Tuba", email = "hubasolttuba@gmail.com"},
+]
+version = "1.0.0dev1"
+requires-python = ">=3.8,<4.0"
+dependencies = [
+    "Flask>=2.3.0,<4.0",
+    "msgspec>=0.18.5,<1.0",
+    "typing-extensions>=4.8.0,<5.0; python_version < \"3.10\"",
+]
 description = "msgspec integration for Flask"
-authors = ["Huba Tuba <hubasolttuba@gmail.com>"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/floxay/flask-msgspec"
-packages = [{include = "flask_msgspec"}]
+license = {text = "MIT"}
 keywords = [
     "api",
     "http",
     "flask",
     "msgspec",
-    "validation",
+    "validation"
 ]
 classifiers = [
     "Environment :: Web Environment",
@@ -25,74 +31,36 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python",
     "Topic :: Internet :: WWW/HTTP",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Libraries",
     "Topic :: Software Development",
-    "Typing :: Typed",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
 ]
 
-[tool.poetry.urls]
+[project.urls]
 "Issue Tracker" = "https://github.com/floxay/flask-msgspec/issues"
-"Changelog" = "https://github.com/floxay/flask-msgspec/releases"
-
-[tool.poetry.dependencies]
-python = ">=3.8,<4"
-msgspec = ">=0.17.0,<1"
-Flask = ">=2.2.0,<3"
-
-[tool.poetry.group.dev.dependencies]
-black = "*"
-ruff = "*"
+Changelog = "https://github.com/floxay/flask-msgspec/releases"
+Repository = "https://github.com/floxay/flask-msgspec"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
+fix = true
 target-version = "py38"
 line-length = 120
-select = [
-    "A",
-    "B",
-    "BLE",
-    "C4",
-    "C90",
-    "DJ",
-    "DTZ",
-    "E",
-    "ERA",
-    "EXE",
-    "F",
-    "G",
-    "I",
-    "ICN",
-    "ISC",
-    "N",
-    "PIE",
-    "PLC",
-    "PLE",
-    "PLW",
-    "PTH",
-    "Q",
-    "RET",
-    "RUF",
-    "S",
-    "SIM",
-    "T10",
-    "T20",
-    "TCH",
-    "TID",
-    "UP",
-    "W",
-    "YTT",
-]
+select = ["ALL"]
 ignore = [
-    "A003",
-    "B010",
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "D",
     "E501",
-    "S104",
+    "PLR2004",
 ]
 src = [
     "flask_msgspec",
@@ -100,17 +68,39 @@ src = [
     "examples"
 ]
 
-[tool.ruff.mccabe]
-max-complexity = 10
-
 [tool.ruff.isort]
-known-first-party = [
-    "flask_msgspec",
-    "tests",
-    "examples"
+known-first-party = ["flask_msgspec", "tests", "examples"]
+
+[tool.pdm.dev-dependencies]
+lint = [
+    "ruff>=0.1.9",
+    "mypy>=1.8.0",
+    "pyright>=1.1.347",
+]
+test = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
 ]
 
-[tool.black]
-line-length = 120
-target-version = ["py38", "py39", "py310", "py311"]
-include = '\.pyi?$'
+[tool.mypy]
+packages = ["flask_msgspec", "tests", "examples"]
+python_version = "3.8"
+strict = true
+warn_unused_ignores = true
+
+[tool.pyright]
+include = ["flask_msgspec", "tests", "examples"]
+pythonVersion = "3.8"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComments = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff.per-file-ignores]
+"tests/*" = [
+    "ARG",
+    "DTZ",
+    "S101"
+]
