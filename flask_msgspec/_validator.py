@@ -4,7 +4,7 @@ import sys
 import typing
 from functools import wraps
 from inspect import Parameter, signature
-from typing import Any, Callable, Sequence, TypeVar, cast
+from typing import Any, Callable, ClassVar, Sequence, TypeVar, cast
 
 from flask import Response, current_app, request
 from msgspec import DecodeError, EncodeError, ValidationError, convert
@@ -41,11 +41,12 @@ __all__ = ("validate",)
 class validate:  # noqa: N801
     __slots__ = (
         "_dec_hook",
-        "_namespace_map",
         "_parameter_map",
         "response_model",
         "strict_response_validation",
     )
+
+    _namespace_map: ClassVar[dict[str, type[Any]]] = {}
 
     def __init__(
         self,
@@ -59,14 +60,13 @@ class validate:  # noqa: N801
                 ``False`` enables looser type coercion rules ("Lax"), meanwhile ``True`` will strictly validate the types ("Strict).
                 See more: https://jcristharif.com/msgspec/usage.html#strict-vs-lax-mode
         """
-        self._namespace_map: dict[str, type[Any]] = {}
         self._parameter_map: dict[str, ParameterData] = {}
         self._dec_hook: Callable[[type[Any], Any], Any] | None = default_dec_hook
 
         self.strict_response_validation: bool | None = strict_response_validation
         self.response_model: type[Any] = Empty
 
-        self._build_namespace_map(signature_types)
+        self._update_namespace_map(signature_types)
 
     def __call__(self, func: Callable[P, T]) -> Callable[P, Response]:
         self._resolve_signature(func)  # precompute what we can here
@@ -98,9 +98,10 @@ class validate:  # noqa: N801
 
         return wrapper
 
-    def _build_namespace_map(self, signature_types: Sequence[type[Any]] | None) -> None:
+    @classmethod
+    def _update_namespace_map(cls, signature_types: Sequence[type[Any]] | None) -> None:
         if signature_types:
-            self._namespace_map = {type_.__name__: type_ for type_ in signature_types}
+            cls._namespace_map.update({type_.__name__: type_ for type_ in signature_types})
 
     def _resolve_signature(self, func: Callable[P, T]) -> None:
         merged_namespace_map = {
